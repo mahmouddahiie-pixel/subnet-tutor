@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="game-page">
+  <div class="game-header">
+    <h1>{{ t.game_heading }}</h1>
+    <div class="game-stats">
+      <span>{{ t.level }} {{ level }}</span>
+      <span>{{ t.score }}: {{ score }}</span>
+      <span>{{ t.streak }}: {{ streak }}</span>
+    </div>
+  </div>
+
+  <div class="level-tabs">
+    {% for lv in range(1, 5) %}
+    <a href="/game?level={{ lv }}" class="level-tab {% if lv == level %}active{% endif %}">{{ t.level }} {{ lv }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="game-card">
+    <p class="game-prompt">{{ prompt }}</p>
+    <p><strong>{{ t.network_label }}:</strong> {{ scenario.network }}</p>
+
+    {% if scenario.type == 'subnet_count' or scenario.type == 'freeform' and scenario.requirement == 'at_least_n_subnets' %}
+    <label>{{ t.your_fingers }}
+      <input type="number" id="answer-fingers" min="1" max="8" value="1">
+    </label>
+    <label>{{ t.your_prefix }}
+      <input type="number" id="answer-prefix" min="24" max="32" placeholder="27">
+    </label>
+    {% endif %}
+
+    {% if scenario.type == 'host_count' or (scenario.type == 'freeform' and scenario.requirement == 'at_least_n_hosts') %}
+    <label>{{ t.your_prefix }}
+      <input type="number" id="answer-prefix" min="24" max="32" placeholder="27">
+    </label>
+    <label>{{ t.your_block_size }}
+      <input type="number" id="answer-block" min="1" max="256" placeholder="32">
+    </label>
+    {% endif %}
+
+    {% if scenario.type == 'ip_assignment' %}
+    <div class="devices-list">
+      {% for device in scenario.devices %}
+      <div class="device-chip">{{ device.name }}: {{ device.ip }}</div>
+      {% endfor %}
+    </div>
+    <label>{{ t.your_subnet }}
+      <select id="answer-subnet">
+        {% for subnet in scenario.subnet_list %}
+        <option value="{{ subnet }}">{{ subnet }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% endif %}
+
+    {% if scenario.type == 'freeform' and scenario.requirement == 'at_least_n_subnets' %}
+    <label>{{ t.your_block_size }}
+      <input type="number" id="answer-block" min="1" max="256" placeholder="32">
+    </label>
+    {% endif %}
+
+    <div class="game-actions">
+      <button type="button" class="btn primary" id="submit-game">{{ t.submit_answer }}</button>
+      <button type="button" class="btn secondary" id="hint-game">{{ t.hint_btn }}</button>
+    </div>
+
+    <div id="game-feedback" class="game-feedback"></div>
+    <pre id="hint-output" class="explain-output"></pre>
+  </div>
+
+  {% if badges %}
+  <div class="badges-panel">
+    <h3>{{ t.badges }}</h3>
+    <ul>{% for b in badges %}<li>{{ b }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+</section>
+
+<script id="scenario-data" type="application/json">{{ scenario | tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/game.js') }}?v={{ static_version }}"></script>
+{% endblock %}

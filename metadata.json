@@ -1,0 +1,37 @@
+{
+  "team_id": "mahmouddahiie-subnet-tutor",
+  "domain": "math_scientific_reasoning",
+  "language_scope": ["en", "ar"],
+  "african_alpha_claim": true,
+  "budget_laptop_claim": true,
+  "submitter": {
+    "name": "Mahmoud Dahy",
+    "email": "mahmouddahiie@gmail.com",
+    "github_handle": "mahmouddahiie-pixel"
+  },
+  "cross_disciplinary_pairing": {
+    "discipline": "education",
+    "load_bearing": true,
+    "description": "Offline bilingual subnetting tutor combining math reasoning (powers of 2, CIDR) with interactive networking education for schools without reliable internet."
+  },
+  "test_prompts": [
+    {
+      "prompt_id": "tp_001",
+      "prompt": "A school network uses 192.168.5.0/24 and needs at least 25 usable hosts per subnet. Using powers of 2, find the subnet mask, number of subnets, and block size. Show each step."
+    },
+    {
+      "prompt_id": "tp_002",
+      "prompt": "Explain in Arabic why borrowing 3 host bits from a /24 creates 8 subnets. Use the finger-counting method and show the math."
+    }
+  ],
+  "model": {
+    "name": "Qwen2.5-1.5B-Instruct-Q4_K_M",
+    "runtime": "llama.cpp",
+    "quantization": "GGUF Q4_K_M",
+    "parameters_estimate": "1.5B",
+    "packaging": "binary_bundle"
+  },
+  "_runtime": {
+    "model_path": "model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+  }
+}

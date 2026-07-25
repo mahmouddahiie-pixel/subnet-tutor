@@ -1,0 +1,12 @@
+{
+  "subnet": {"en": "Subnet", "ar": "شبكة فرعية"},
+  "subnet_mask": {"en": "Subnet Mask", "ar": "قناع الشبكة الفرعية"},
+  "broadcast": {"en": "Broadcast Address", "ar": "عنوان البث"},
+  "network_address": {"en": "Network Address", "ar": "عنوان الشبكة"},
+  "cidr": {"en": "CIDR Prefix", "ar": "بادئة CIDR"},
+  "host": {"en": "Host", "ar": "مضيف"},
+  "block_size": {"en": "Block Size", "ar": "حجم الكتلة"},
+  "borrowed_bits": {"en": "Borrowed Bits", "ar": "البتات المستعارة"},
+  "finger_method": {"en": "Finger Counting Method", "ar": "طريقة عد الأصابع"},
+  "powers_of_two": {"en": "Powers of Two", "ar": "قوى العدد 2"}
+}

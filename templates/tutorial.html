@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="tutorial-page">
+  <h1>{{ t.tutorial_heading }}</h1>
+
+  <div class="tutorial-layout">
+    <aside class="lesson-steps">
+      {% for step in steps %}
+      <button type="button" class="step-tab {% if loop.first %}active{% endif %}" data-step="{{ loop.index0 }}">
+        {{ t.tutorial_step }} {{ loop.index }}: {{ step.title }}
+      </button>
+      {% endfor %}
+    </aside>
+
+    <div class="lesson-panel">
+      {% for step in steps %}
+      <div class="step-content {% if loop.first %}active{% endif %}" data-step-panel="{{ loop.index0 }}">
+        <h2>{{ step.title }}</h2>
+        <p>{{ step.body }}</p>
+
+        {% if step.id == 'powers' or step.id == 'walkthrough' %}
+        <div class="finger-interactive">
+          <div class="hands-display">
+            <svg id="hands-svg-{{ loop.index0 }}" viewBox="0 0 500 200" class="hands-svg"></svg>
+          </div>
+          <div class="finger-controls">
+            <button type="button" class="btn secondary finger-btn" data-action="raise">{{ t.raise_fingers }}</button>
+            <button type="button" class="btn secondary finger-btn" data-action="reset">{{ t.reset_fingers }}</button>
+          </div>
+          <div class="finger-stats">
+            <div><strong>{{ t.subnets_label }}:</strong> <span class="stat-subnets">0</span></div>
+            <div><strong>{{ t.block_size_label }}:</strong> <span class="stat-block">—</span></div>
+            <div><strong>{{ t.prefix_label }}:</strong> <span class="stat-prefix">/24</span></div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if step.id == 'fold' %}
+        <div class="fold-interactive">
+          <div class="network-bar" id="network-bar">
+            <span>192.168.1.0/24</span>
+          </div>
+          <button type="button" class="btn primary" id="fold-btn">{{ t.fold_network }}</button>
+          <div id="fold-result" class="fold-result"></div>
+        </div>
+        {% endif %}
+
+        {% if step.id == 'walkthrough' %}
+        <div class="walkthrough-box">
+          <p><strong>{{ step.example_network }}</strong> — {{ t.required_subnets }}: {{ step.required_subnets }}</p>
+          <p id="walkthrough-feedback"></p>
+        </div>
+        {% endif %}
+
+        <div class="explain-section">
+          <textarea id="explain-q-{{ loop.index0 }}" rows="2" placeholder="{{ t.ask_tutor_placeholder }}">{% if step.id == 'walkthrough' %}{{ t.explain_walkthrough_default.replace('{network}', step.example_network) }}{% else %}{{ step.body }}{% endif %}</textarea>
+          <button type="button" class="btn primary explain-btn" data-step="{{ loop.index0 }}">{{ t.explain_btn }}</button>
+          <pre class="explain-output" id="explain-out-{{ loop.index0 }}"></pre>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="step-nav">
+        <button type="button" class="btn secondary" id="prev-step">{{ t.prev_step }}</button>
+        <button type="button" class="btn primary" id="next-step">{{ t.next_step }}</button>
+      </div>
+    </div>
+  </div>
+
+  <table class="finger-table">
+    <thead>
+      <tr>
+        <th>{{ t.table_fingers }}</th>
+        <th>{{ t.subnets_label }}</th>
+        <th>{{ t.block_size_label }}</th>
+        <th>{{ t.table_mask }}</th>
+        <th>{{ t.prefix_label }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in finger_table %}
+      <tr>
+        <td>{{ row.finger }}</td>
+        <td>{{ row.subnets }}</td>
+        <td>{{ row.block_size }}</td>
+        <td>{{ row.mask_octet }}</td>
+        <td>/{{ 24 + row.prefix_offset }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.FINGER_TABLE = {{ finger_table | tojson }};
+  window.WALKTHROUGH = { required: 6, answerFingers: 3 };
+</script>
+<script src="{{ url_for('static', filename='js/tutorial.js') }}?v={{ static_version }}"></script>
+{% endblock %}

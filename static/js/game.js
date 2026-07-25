@@ -1,0 +1,75 @@
+const I18N = window.I18N || {};
+const scenario = JSON.parse(document.getElementById('scenario-data')?.textContent || '{}');
+const feedbackEl = document.getElementById('game-feedback');
+const hintEl = document.getElementById('hint-output');
+
+function collectAnswer() {
+  const answer = {};
+  const fingers = document.getElementById('answer-fingers');
+  const prefix = document.getElementById('answer-prefix');
+  const block = document.getElementById('answer-block');
+  const subnet = document.getElementById('answer-subnet');
+
+  if (fingers?.value) answer.fingers = Number(fingers.value);
+  if (prefix?.value) answer.prefix = Number(prefix.value);
+  if (block?.value) answer.block_size = Number(block.value);
+  if (subnet?.value) answer.subnet = subnet.value;
+
+  return answer;
+}
+
+document.getElementById('submit-game')?.addEventListener('click', async () => {
+  const answer = collectAnswer();
+  const res = await fetch('/api/game/grade', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scenario, answer }),
+  });
+  const data = await res.json();
+
+  feedbackEl.className = 'game-feedback ' + (data.correct ? 'success' : 'error');
+  let msg = data.message || (data.correct ? I18N.correct : I18N.incorrect);
+  if (data.details?.length) msg += '\n' + data.details.join('\n');
+  if (data.badges?.length) {
+    const badgeLine = (I18N.badges_earned || '{list}').replace('{list}', data.badges.join(', '));
+    msg += '\n' + badgeLine;
+  }
+  feedbackEl.textContent = msg;
+
+  if (data.correct) {
+    setTimeout(() => window.location.reload(), 1500);
+  }
+});
+
+document.getElementById('hint-game')?.addEventListener('click', async () => {
+  let useLlm = false;
+  if (typeof window.fetchModelStatus === 'function') {
+    const status = await window.fetchModelStatus();
+    useLlm = Boolean(status?.loaded);
+    hintEl.textContent = status?.loading
+      ? I18N.loading_model || I18N.loading || '...'
+      : useLlm
+        ? I18N.loading || 'Thinking...'
+        : I18N.loading_rag || I18N.loading || '...';
+  } else {
+    hintEl.textContent = I18N.loading_rag || I18N.loading || '...';
+  }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch('/api/game/hint', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario, use_llm: useLlm }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    const data = await res.json();
+    hintEl.textContent = data.answer || I18N.no_hint;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    console.error('[hint] request failed:', err);
+    hintEl.textContent =
+      err.name === 'AbortError' ? I18N.request_timeout : I18N.request_error || I18N.no_hint;
+  }
+});

@@ -1,0 +1,95 @@
+[
+  {
+    "id": "wp_001",
+    "lang": "en",
+    "network": "192.168.1.0/24",
+    "requirement": "at_least_6_subnets",
+    "required_value": 6,
+    "answer_prefix": 27,
+    "answer_subnets": 8,
+    "answer_mask": "255.255.255.224",
+    "answer_block_size": 32,
+    "borrowed_bits": 3,
+    "steps": [
+      "Count fingers until subnets >= 6: 2, 4, 8 → 3 fingers",
+      "Borrow 3 bits from host portion",
+      "New prefix = 24 + 3 = /27",
+      "Block size = 32, mask = 255.255.255.224",
+      "Creates 8 subnets (more than the 6 required)"
+    ]
+  },
+  {
+    "id": "wp_002",
+    "lang": "en",
+    "network": "192.168.5.0/24",
+    "requirement": "at_least_25_hosts",
+    "required_value": 25,
+    "answer_prefix": 27,
+    "answer_subnets": 8,
+    "answer_mask": "255.255.255.224",
+    "answer_block_size": 32,
+    "borrowed_bits": 3,
+    "host_bits": 5,
+    "steps": [
+      "Find host bits: smallest n where 2^n - 2 >= 25 → n=5 (30 hosts)",
+      "Prefix = 32 - 5 = /27",
+      "Borrowed bits = 27 - 24 = 3",
+      "Subnets = 2^3 = 8",
+      "Block size = 2^5 = 32"
+    ]
+  },
+  {
+    "id": "wp_003",
+    "lang": "en",
+    "network": "10.0.0.0/24",
+    "requirement": "at_least_4_subnets",
+    "required_value": 4,
+    "answer_prefix": 26,
+    "answer_subnets": 4,
+    "answer_mask": "255.255.255.192",
+    "answer_block_size": 64,
+    "borrowed_bits": 2,
+    "steps": [
+      "Count fingers: 2 (1), 4 (2) → 2 fingers for exactly 4 subnets",
+      "Borrow 2 bits → /26",
+      "Block size = 64, mask = 255.255.255.192"
+    ]
+  },
+  {
+    "id": "wp_004",
+    "lang": "ar",
+    "network": "192.168.1.0/24",
+    "requirement": "at_least_6_subnets",
+    "required_value": 6,
+    "answer_prefix": 27,
+    "answer_subnets": 8,
+    "answer_mask": "255.255.255.224",
+    "answer_block_size": 32,
+    "borrowed_bits": 3,
+    "steps": [
+      "عد الأصابع حتى الشبكات >= 6: 2، 4، 8 → 3 أصابع",
+      "استعار 3 بتات من جزء المضيف",
+      "البادئة الجديدة = 24 + 3 = /27",
+      "حجم الكتلة = 32، القناع = 255.255.255.224",
+      "ينشئ 8 شبكات فرعية (أكثر من 6 المطلوبة)"
+    ]
+  },
+  {
+    "id": "wp_005",
+    "lang": "en",
+    "network": "172.16.0.0/24",
+    "requirement": "at_least_50_hosts",
+    "required_value": 50,
+    "answer_prefix": 26,
+    "answer_subnets": 4,
+    "answer_mask": "255.255.255.192",
+    "answer_block_size": 64,
+    "borrowed_bits": 2,
+    "host_bits": 6,
+    "steps": [
+      "Host bits: 2^6 - 2 = 62 >= 50 → 6 host bits",
+      "Prefix = 32 - 6 = /26",
+      "Borrowed = 2, subnets = 4, block = 64"
+    ]
+  }
+]

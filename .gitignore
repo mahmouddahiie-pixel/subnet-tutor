@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+model/
+*.gguf
+.rag_index/
+*.db
+.DS_Store
+submission.json
+audit.json

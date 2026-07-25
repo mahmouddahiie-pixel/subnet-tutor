@@ -1,0 +1,10 @@
+[
+  {"finger": 1, "subnets": 2, "block_size": 128, "mask_octet": 128, "prefix_offset": 1},
+  {"finger": 2, "subnets": 4, "block_size": 64, "mask_octet": 192, "prefix_offset": 2},
+  {"finger": 3, "subnets": 8, "block_size": 32, "mask_octet": 224, "prefix_offset": 3},
+  {"finger": 4, "subnets": 16, "block_size": 16, "mask_octet": 240, "prefix_offset": 4},
+  {"finger": 5, "subnets": 32, "block_size": 8, "mask_octet": 248, "prefix_offset": 5},
+  {"finger": 6, "subnets": 64, "block_size": 4, "mask_octet": 252, "prefix_offset": 6},
+  {"finger": 7, "subnets": 128, "block_size": 2, "mask_octet": 254, "prefix_offset": 7},
+  {"finger": 8, "subnets": 256, "block_size": 1, "mask_octet": 255, "prefix_offset": 8}
+]

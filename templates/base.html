@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ t.app_title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ static_version }}">
+</head>
+<body class="lang-{{ lang }}">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">{{ t.app_title }}</a>
+      <nav>
+        <a href="/">{{ t.nav_home }}</a>
+        <a href="/tutorial">{{ t.nav_tutorial }}</a>
+        <a href="/game">{{ t.nav_game }}</a>
+      </nav>
+      <div class="lang-switch">
+        <button type="button" data-lang="en" class="{% if lang == 'en' %}active{% endif %}">EN</button>
+        <button type="button" data-lang="ar" class="{% if lang == 'ar' %}active{% endif %}">AR</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>{{ t.offline_note }}{% if model_loaded %} · {{ t.footer_llm_ready }}{% elif model_loading %} · {{ t.loading_model }}{% else %} · {{ t.footer_tutor_fallback }}{% endif %}</p>
+  </footer>
+
+  <script>window.I18N = {{ t | tojson }};</script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v={{ static_version }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

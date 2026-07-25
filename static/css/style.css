@@ -1,0 +1,328 @@
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --border: #e2e8f0;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+body.lang-ar {
+  font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", Arial, sans-serif;
+}
+
+.container {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+}
+
+.site-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.logo {
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+nav a {
+  margin-inline: 0.5rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+nav a:hover { color: var(--primary); }
+
+.lang-switch button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lang-switch button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+
+.hero-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.btn.primary { background: var(--primary); color: white; }
+.btn.primary:hover { background: var(--primary-dark); }
+.btn.secondary { background: #e2e8f0; color: var(--text); }
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.tutorial-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1rem;
+}
+
+.lesson-steps { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.step-tab {
+  text-align: start;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+.step-tab.active {
+  border-color: var(--primary);
+  background: #eff6ff;
+}
+
+.lesson-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.step-content { display: none; }
+.step-content.active { display: block; }
+
+.hands-svg {
+  width: 100%;
+  max-width: 500px;
+  background: #f1f5f9;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.finger-controls, .finger-stats, .game-actions, .step-nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.finger-stats div {
+  background: #f1f5f9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+}
+
+.network-bar {
+  background: linear-gradient(90deg, #93c5fd, #60a5fa);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  transition: transform 0.3s;
+}
+
+.fold-result {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.fold-piece {
+  flex: 1;
+  min-width: 100px;
+  background: #dcfce7;
+  border: 2px solid var(--success);
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.finger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+  background: var(--card);
+}
+
+.finger-table th, .finger-table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.explain-section textarea {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.explain-output {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  min-height: 60px;
+  margin-top: 0.75rem;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.game-stats span {
+  margin-inline: 0.75rem;
+  background: var(--card);
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.level-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.level-tab {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card);
+}
+
+.level-tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.game-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.game-card label {
+  display: block;
+  margin: 0.75rem 0;
+}
+
+.game-card input, .game-card select {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.devices-list { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+
+.device-chip {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.game-feedback {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.game-feedback.success { background: #dcfce7; color: #166534; }
+.game-feedback.error { background: #fee2e2; color: #991b1b; }
+
+.badges-panel {
+  margin-top: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.site-footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .hero, .tutorial-layout { grid-template-columns: 1fr; }
+}
+
+[dir="rtl"] .header-inner { flex-direction: row-reverse; }
+[dir="rtl"] nav a { margin-inline: 0.5rem; }
