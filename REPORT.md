@@ -68,29 +68,71 @@ This aligns with the ADTC mission: useful on-device AI on hardware Africans alre
 
 ## 6. Performance Benchmarks
 
-Run on ADTC Standard Laptop (Ubuntu 22.04, 8 GB RAM, integrated GPU):
+Measured on participant laptop via `adtc-profiler` (2026-07-26):
 
 ```bash
-pip install "git+https://github.com/Africa-Deep-Tech-Foundation/adtc-profiler.git"
-bash download_model.sh
-adtc-profiler run --submission . --mode participant --output submission.json --skip-accuracy
+bash install_llama_bench.sh   # llama.cpp-tools
+bash run_profiler.sh          # → submission.json
 ```
 
-**Measured results** *(fill in after `bash run_profiler.sh` on 8 GB laptop)*:
+### Environment (this run)
 
-| Metric | Target | Measured | Pass? |
+| Field | Value |
+|---|---|
+| Measured on | `participant_laptop` |
+| CPU | Intel Core i7-6500U @ 2.50 GHz |
+| RAM (system) | 3.3 GB reported |
+| GPU | None (CPU only) |
+| OS | Ubuntu 26.04 LTS |
+| Model | Qwen2.5-1.5B-Instruct Q4_K_M (GGUF) |
+| Git commit | `ca96da840ae3` |
+
+### Results summary
+
+| Metric | ADTC target | Measured | Pass? |
 |---|---|---|---|
-| Peak RAM | ≤ 4 GB | ___ MB | |
-| Throughput (TPS) | ≥ 10 tok/s | ___ | |
-| Thermal throttle | None > 85°C | ___ | |
-| Profiler mode | participant | ___ | |
+| Peak RSS RAM | ≤ 4 GB (efficiency budget ≤ 7 GB) | **1655 MB** | ✅ |
+| Steady-state RSS | — | **1009 MB** | ✅ |
+| Generation TPS | ≥ 10 tok/s (ref max 15) | **7.36 tok/s** | ⚠️ below 10 |
+| First-token latency | — | **28.8 s** (cold start) | ⚠️ high |
+| CPU p99 | — | **100%** | — |
+| Thermal throttle | None > 85°C | **Not throttled** | ✅ |
+| Peak core temp | — | Not reported | — |
+
+### ADTC scoring estimate (reference formulas)
+
+| Component | Estimate | Notes |
+|---|---|---|
+| **Sperf** (30%) | ~49% | 7.36 / 15.0 × 100 |
+| **Seff** (20%) | ~76% | (7168 − 1655) / 7168 × 100 |
+| **Sacc** (50%) | TBD | Requires accuracy benchmark + judge |
+| **Pthermal** | 0 | `throttled: false` |
+
+### Raw profiler excerpt (`submission.json`)
 
 ```json
-// Paste key fields from submission.json:
-// "peak_ram_mb": ...,
-// "tokens_per_second": ...,
-// "measured_on": "participant_laptop"
+{
+  "environment": {
+    "measured_on": "participant_laptop",
+    "cpu_model": "Intel(R) Core(TM) i7-6500U CPU @ 2.50GHz",
+    "ram_gb": 3.3,
+    "os": "Ubuntu 26.04 LTS"
+  },
+  "throughput": {
+    "tokens_per_second_generation": 7.36,
+    "first_token_latency_ms": 28800.24
+  },
+  "memory": {
+    "peak_rss_mb": 1655.32,
+    "steady_state_rss_mb": 1008.85
+  },
+  "cpu_thermal": {
+    "throttled": false
+  }
+}
 ```
+
+**Note:** Re-run on an **8 GB ADTC reference laptop** (i5 10th–12th gen / Ryzen 5) for final submission numbers. This VM has limited RAM (3.3 GB) and older CPU; TPS and cold-start latency should improve on reference hardware.
 
 ## 7. Test Prompts (metadata.json)
 
