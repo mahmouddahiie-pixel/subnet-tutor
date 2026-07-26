@@ -11,3 +11,4 @@ model/
 .DS_Store
 submission.json
 audit.json
+demo_output/

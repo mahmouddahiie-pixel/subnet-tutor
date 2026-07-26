@@ -1,0 +1,53 @@
+# =============================================================================
+# DEVPOST SUBMISSION — Copy each section into the form at:
+# https://adtc-2026.devpost.com  → Join hackathon → My projects → Create
+# (You must be logged in to DevPost first)
+# =============================================================================
+
+PROJECT TITLE:
+Subnet Tutor — Offline Bilingual Subnetting Tutor (Keith Barker Method)
+
+TAGLINE:
+On-device subnetting tutor with finger-counting method, game, and local LLM — EN/AR, zero internet.
+
+GITHUB REPO:
+https://github.com/mahmouddahiie-pixel/subnet-tutor
+
+VIDEO URL:
+(upload demo_output/subnet-tutor-demo.mp4 to YouTube unlisted, paste link here)
+OR run: bash upload_demo_release.sh
+
+---
+
+FULL DESCRIPTION (paste into DevPost):
+
+Subnet Tutor is an offline, on-device educational application built for the Africa Deep Tech Challenge 2026 (ADTC). It teaches IP subnetting through Keith Barker's finger-counting method, combining math reasoning with hands-on practice — fully bilingual in English and Arabic.
+
+WHAT IT DOES
+• Interactive tutorial: raise fingers to count powers of 2 (2, 4, 8…256 subnets)
+• 4-level subnetting game with deterministic grading
+• On-device AI tutor: Qwen2.5-1.5B-Instruct (GGUF Q4_K_M) via llama.cpp + local RAG
+• 100% offline after one-time model download
+
+ADTC ALIGNMENT
+• Domain: Math & Scientific Reasoning
+• Runtime: llama.cpp (mandatory GGUF)
+• Peak RSS: 1655 MB | TPS: 7.36 tok/s (profiler run)
+• African use case: offline IT education for schools without reliable internet
+
+TRY IT
+git clone https://github.com/mahmouddahiie-pixel/subnet-tutor.git
+cd subnet-tutor && bash setup.sh && bash download_model.sh && bash run.sh
+
+Team: Mahmoud Dahy | mahmouddahiie@gmail.com
+
+---
+
+BUILT WITH:
+Python, Flask, llama.cpp, llama-cpp-python, Qwen2.5-1.5B, GGUF, JavaScript, HTML/CSS
+
+SCREENSHOTS TO UPLOAD:
+screenshots/home-en.png
+screenshots/tutorial-fingers.png
+screenshots/game-level1.png
+screenshots/tutorial-ar.png

@@ -44,15 +44,26 @@ git push -u origin main
 
 ## Step 3 — Run ADTC profiler
 
+**Prerequisite:** `llama-bench` must be on your PATH (from llama.cpp).
+
+```bash
+# Install llama-bench (Ubuntu — one time)
+sudo apt update
+sudo apt install -y llama.cpp-tools
+# verify:
+llama-bench --help
+
+# Or use our helper:
+bash install_llama_bench.sh
+```
+
 On your **8 GB Ubuntu 22.04** laptop:
 
 ```bash
 cd ~/Projects/subnet-tutor
 source .venv/bin/activate
-sudo apt install git   # required for profiler install
 pip install "git+https://github.com/Africa-Deep-Tech-Foundation/adtc-profiler.git"
 
-# Install llama.cpp llama-bench if not on PATH
 bash download_model.sh
 bash run_profiler.sh
 ```
