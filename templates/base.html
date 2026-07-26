@@ -27,7 +27,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>{{ t.offline_note }}{% if model_loaded %} · {{ t.footer_llm_ready }}{% elif model_loading %} · {{ t.loading_model }}{% else %} · {{ t.footer_tutor_fallback }}{% endif %}</p>
+    <p id="footer-status">{{ t.offline_note }}{% if model_loaded %} · {{ t.footer_llm_ready }}{% elif model_loading %} · {{ t.loading_model }}{% elif model_error %} · {{ t.footer_model_error }}{% else %} · {{ t.footer_tutor_fallback }}{% endif %}</p>
   </footer>
 
   <script>window.I18N = {{ t | tojson }};</script>

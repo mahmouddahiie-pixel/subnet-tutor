@@ -53,14 +53,30 @@ def get_llm():
             f"Model not found at {model_path}. Run: bash download_model.sh"
         )
 
-    from llama_cpp import Llama
+    try:
+        from llama_cpp import Llama
+    except ImportError as exc:
+        raise ImportError(
+            "llama-cpp-python is not installed. Run: pip install llama-cpp-python"
+        ) from exc
 
-    _llm_instance = Llama(
-        model_path=str(model_path),
-        n_ctx=2048,
-        n_threads=max(2, (os.cpu_count() or 4) - 1),
-        verbose=False,
+    n_ctx = int(os.environ.get("SUBNET_TUTOR_N_CTX", "2048"))
+    n_threads = int(
+        os.environ.get("SUBNET_TUTOR_N_THREADS", str(max(2, (os.cpu_count() or 4) - 1)))
     )
+
+    with _llm_lock:
+        if _llm_instance is not None:
+            return _llm_instance
+        _llm_instance = Llama(
+            model_path=str(model_path),
+            n_ctx=n_ctx,
+            n_threads=n_threads,
+            use_mmap=True,
+            verbose=False,
+        )
+        global _llm_load_error
+        _llm_load_error = None
     return _llm_instance
 
 
@@ -75,13 +91,59 @@ def preload_model() -> None:
         if _llm_instance is not None or _llm_loading:
             return
         _llm_loading = True
+        _llm_load_error = None
 
     try:
         get_llm()
+        print("[LLM] Model loaded successfully.")
     except Exception as exc:
         _llm_load_error = str(exc)
+        print(f"[LLM] Failed to load model: {exc}")
     finally:
         _llm_loading = False
+
+
+def retry_model_preload() -> None:
+    """Clear error state and attempt preload again."""
+    global _llm_load_error
+    if is_model_loaded():
+        return
+    _llm_load_error = None
+    start_model_preload()
+
+
+def get_model_status_dict() -> dict:
+    """Full model status for API and diagnostics."""
+    path = get_model_path()
+    llama_ok = False
+    llama_error = None
+    try:
+        import llama_cpp  # noqa: F401
+        llama_ok = True
+    except ImportError as exc:
+        llama_error = str(exc)
+
+    if is_model_loaded():
+        status = "ready"
+    elif is_model_loading():
+        status = "loading"
+    elif _llm_load_error or llama_error:
+        status = "error"
+    elif not path.is_file():
+        status = "unavailable"
+    else:
+        status = "pending"
+
+    return {
+        "available": path.is_file(),
+        "loaded": is_model_loaded(),
+        "loading": is_model_loading(),
+        "status": status,
+        "model_path": str(path),
+        "model_size_mb": round(path.stat().st_size / (1024 * 1024), 1) if path.is_file() else None,
+        "llama_cpp_installed": llama_ok,
+        "error": _llm_load_error or llama_error,
+    }
 
 
 def start_model_preload() -> None:
@@ -181,18 +243,24 @@ def generate_fallback_response(
     *,
     model_loading: bool = False,
     model_available: bool | None = None,
+    model_load_error: str | None = None,
 ) -> str:
     """Rule-based fallback when model weights are unavailable or still loading."""
     if model_available is None:
         model_available = is_model_available()
+    if model_load_error is None:
+        model_load_error = get_model_load_error()
 
     bullets = _summarize_context(context, language)
     bullet_block = "\n".join(f"• {b}" for b in bullets)
 
     if language == "ar":
-        if model_loading or (model_available and not is_model_loaded()):
+        if model_load_error:
+            prefix = "【المعلّم الذكي】 تعذّر تحميل النموذج — إليك ملخصاً من المعرفة المحلية:\n\n"
+            suffix = f"\n\nخطأ: {model_load_error[:300]}\n\nالحل: pip install llama-cpp-python ثم bash run.sh"
+        elif model_loading:
             prefix = "【المعلّم الذكي】 جاري تحميل النموذج — إليك ملخصاً من المعرفة المحلية:\n\n"
-            suffix = "\n\nالنموذج قيد التحميل. جرّب مرة أخرى بعد لحظات للحصول على شرح كامل."
+            suffix = "\n\nانتظر حتى يظهر «نموذج اللغة جاهز» في الأسفل."
         elif not model_available:
             prefix = "【المعلّم الذكي】 وضع بدون نموذج — إليك ملخصاً من المعرفة المحلية:\n\n"
             suffix = "\n\nلتفعيل الشروحات الكاملة، نفّذ: bash download_model.sh"
@@ -201,9 +269,17 @@ def generate_fallback_response(
             suffix = ""
         return f"{prefix}{bullet_block}\n\nسؤالك: {user_question}{suffix}"
 
-    if model_loading or (model_available and not is_model_loaded()):
+    if model_load_error:
+        prefix = "[AI Tutor] Model failed to load — here is a summary from local knowledge:\n\n"
+        suffix = (
+            f"\n\nLoad error: {model_load_error[:300]}"
+            "\n\nFix: source .venv/bin/activate && pip install llama-cpp-python"
+            "\nThen: bash run.sh"
+            "\nDiagnose: bash scripts/diagnose_llm.sh"
+        )
+    elif model_loading:
         prefix = "[AI Tutor] Model is loading — here is a summary from local knowledge:\n\n"
-        suffix = "\n\nThe model is still loading. Try again in a moment for a full explanation."
+        suffix = "\n\nWait until the footer shows «LLM ready», then try again."
     elif not model_available:
         prefix = "[AI Tutor] Offline mode — here is a summary from local knowledge:\n\n"
         suffix = "\n\nRun `bash download_model.sh` to enable full LLM explanations."
@@ -236,6 +312,7 @@ def ask_tutor(
         language,
         model_loading=loading,
         model_available=is_model_available(),
+        model_load_error=get_model_load_error(),
     )
     result: dict = {"answer": answer, "mode": "fallback"}
     if loading:

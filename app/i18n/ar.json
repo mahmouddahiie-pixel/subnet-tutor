@@ -49,6 +49,7 @@
   "game_level4_prompt": "حل مسألة تقسيم الشبكة لـ {network}. اعرض تفكيرك.",
   "footer_llm_ready": "نموذج اللغة جاهز",
   "footer_tutor_fallback": "وضع المعلّم الاحتياطي",
+  "footer_model_error": "فشل تحميل النموذج — راجع الطرفية أو نفّذ bash scripts/diagnose_llm.sh",
   "hero_subnet_a": "شبكة فرعية A /25",
   "hero_subnet_b": "شبكة فرعية B /25",
   "hero_flow": "اطوِ ← قسّم ← عيّن الأجهزة",

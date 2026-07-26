@@ -305,8 +305,20 @@ class TestOfflineLlmLogic(unittest.TestCase):
             model_available=True,
         )
         self.assertIn("Model is loading", answer)
-        self.assertIn("Try again in a moment", answer)
+        self.assertIn("LLM ready", answer)
         self.assertNotIn("download_model.sh", answer)
+
+    def test_fallback_mode_when_model_load_failed(self):
+        answer = generate_fallback_response(
+            "What is /27?",
+            "- Subnets created = 2^borrowed_bits",
+            language="en",
+            model_available=True,
+            model_load_error="No module named 'llama_cpp'",
+        )
+        self.assertIn("Model failed to load", answer)
+        self.assertIn("llama_cpp", answer)
+        self.assertNotIn("Model is loading", answer)
 
     def test_fallback_arabic_uses_arabic_text(self):
         answer = generate_fallback_response(

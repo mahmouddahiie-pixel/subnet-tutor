@@ -14,9 +14,12 @@ from app.game.scoring import badge_labels, update_score
 from app.i18n import get_strings, translate
 from app.llm.client import (
     ask_tutor,
+    get_model_load_error,
+    get_model_status_dict,
     is_model_available,
     is_model_loaded,
     is_model_loading,
+    retry_model_preload,
     start_model_preload,
 )
 from app.rag.retriever import build_index, retrieve
@@ -53,6 +56,7 @@ def create_app() -> Flask:
             "dir": "rtl" if lang == "ar" else "ltr",
             "model_loaded": is_model_loaded(),
             "model_loading": is_model_loading(),
+            "model_error": get_model_load_error(),
             "static_version": STATIC_VERSION,
         }
 
@@ -99,13 +103,12 @@ def create_app() -> Flask:
 
     @app.route("/api/model-status")
     def model_status():
-        return jsonify(
-            {
-                "available": is_model_available(),
-                "loaded": is_model_loaded(),
-                "loading": is_model_loading(),
-            }
-        )
+        return jsonify(get_model_status_dict())
+
+    @app.route("/api/model-reload", methods=["POST"])
+    def model_reload():
+        retry_model_preload()
+        return jsonify(get_model_status_dict())
 
     @app.route("/api/explain", methods=["POST"])
     def explain():

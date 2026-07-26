@@ -206,7 +206,7 @@ class TestAllApis(E2EReadinessBase):
         resp = self.client.get("/api/model-status")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        for key in ("available", "loaded", "loading"):
+        for key in ("available", "loaded", "loading", "status", "model_path"):
             self.assertIn(key, data)
         if (ROOT / "model" / "qwen2.5-1.5b-instruct-q4_k_m.gguf").is_file():
             self.assertTrue(data["available"])

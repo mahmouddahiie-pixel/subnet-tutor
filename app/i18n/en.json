@@ -49,6 +49,7 @@
   "game_level4_prompt": "Solve this subnetting problem for {network}. Show your reasoning.",
   "footer_llm_ready": "LLM ready",
   "footer_tutor_fallback": "Tutor fallback mode",
+  "footer_model_error": "LLM load failed — see terminal or run bash scripts/diagnose_llm.sh",
   "hero_subnet_a": "/25 subnet A",
   "hero_subnet_b": "/25 subnet B",
   "hero_flow": "Fold → Split → Assign devices",

@@ -136,3 +136,37 @@ async function askTutor(question, outputEl, options = {}) {
 
 window.askTutor = askTutor;
 window.fetchModelStatus = fetchModelStatus;
+
+function updateFooterStatus(status) {
+  const el = document.getElementById('footer-status');
+  const I18N = window.I18N || {};
+  if (!el || !status) return;
+
+  const offline = I18N.offline_note || 'Runs 100% offline after setup';
+  let suffix = I18N.footer_tutor_fallback || 'Tutor fallback mode';
+
+  if (status.loaded) {
+    suffix = I18N.footer_llm_ready || 'LLM ready';
+  } else if (status.loading) {
+    suffix = I18N.loading_model || 'Loading model...';
+  } else if (status.error || status.status === 'error') {
+    suffix = I18N.footer_model_error || 'LLM load failed';
+  } else if (!status.available) {
+    suffix = I18N.footer_tutor_fallback || 'Tutor fallback mode';
+  }
+
+  el.textContent = `${offline} · ${suffix}`;
+}
+
+async function pollModelStatus() {
+  const status = await fetchModelStatus();
+  if (!status) return;
+  updateFooterStatus(status);
+  if (!status.loaded && (status.loading || status.status === 'pending')) {
+    setTimeout(pollModelStatus, 3000);
+  }
+}
+
+if (document.getElementById('footer-status')) {
+  pollModelStatus();
+}
