@@ -20,7 +20,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 sudo apt install -y build-essential cmake ninja-build
-pip install -r requirements.txt
+bash install_llama_bench.sh
+pip install -r requirements.txt    OR    bash setup.sh
 
 # 2. Download model weights (one-time, requires internet)
 bash download_model.sh
