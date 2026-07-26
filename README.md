@@ -13,8 +13,13 @@ Offline bilingual (English / Arabic) subnetting tutor for the **Africa Deep Tech
 
 ```bash
 # 1. Create virtual environment
+sudo apt update
+sudo apt install python3.14-venv
+
 python3 -m venv .venv
 source .venv/bin/activate
+
+sudo apt install -y build-essential cmake ninja-build
 pip install -r requirements.txt
 
 # 2. Download model weights (one-time, requires internet)
