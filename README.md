@@ -12,24 +12,22 @@ Offline bilingual (English / Arabic) subnetting tutor for the **Africa Deep Tech
 ## Quick Start
 
 ```bash
-# 1. Create virtual environment
+## 1. Dependencies
+git clone https://github.com/mahmouddahiie-pixel/subnet-tutor.git
+
 sudo apt update
-sudo apt install python3.14-venv
-
-python3 -m venv .venv
-source .venv/bin/activate
-
 sudo apt install -y build-essential cmake ninja-build
 bash install_llama_bench.sh
-pip install -r requirements.txt    OR    bash setup.sh
 
-# 2. Download model weights (one-time, requires internet)
+# 2. Create virtual environment
+
+bash setup.sh     OR    pip install -r requirements.txt
+
+# 3. Download model weights (one-time, requires internet)
 bash download_model.sh
 
-# 3. Build RAG index (automatic on first run)
-python -m app.rag.indexer
-
 # 4. Launch app
+source .venv/bin/activate
 bash run.sh
 # Open http://127.0.0.1:8765
 ```
