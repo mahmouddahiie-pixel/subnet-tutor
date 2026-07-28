@@ -42,34 +42,16 @@ document.getElementById('submit-game')?.addEventListener('click', async () => {
 });
 
 document.getElementById('hint-game')?.addEventListener('click', async () => {
-  let useLlm = false;
-  if (typeof window.fetchModelStatus === 'function') {
-    const status = await window.fetchModelStatus();
-    useLlm = Boolean(status?.loaded);
-    hintEl.textContent = status?.loading
-      ? I18N.loading_model || I18N.loading || '...'
-      : useLlm
-        ? I18N.loading || 'Thinking...'
-        : I18N.loading_rag || I18N.loading || '...';
-  } else {
-    hintEl.textContent = I18N.loading_rag || I18N.loading || '...';
-  }
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const btn = document.getElementById('hint-game');
+  if (btn) btn.disabled = true;
   try {
-    const res = await fetch('/api/game/hint', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario, use_llm: useLlm }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    const data = await res.json();
-    hintEl.textContent = data.answer || I18N.no_hint;
-  } catch (err) {
-    clearTimeout(timeoutId);
-    console.error('[hint] request failed:', err);
-    hintEl.textContent =
-      err.name === 'AbortError' ? I18N.request_timeout : I18N.request_error || I18N.no_hint;
+    if (typeof window.askHint === 'function') {
+      await window.askHint(scenario, hintEl);
+    } else if (typeof window.askTutor === 'function') {
+      const q = `Hint for ${scenario.network} needing ${scenario.required_value}`;
+      await window.askTutor(q, hintEl);
+    }
+  } finally {
+    if (btn) btn.disabled = false;
   }
 });

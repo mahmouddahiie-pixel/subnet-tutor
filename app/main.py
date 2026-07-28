@@ -26,7 +26,7 @@ from app.rag.retriever import build_index, retrieve
 from app.tutorial.finger_lessons import get_lesson_steps, load_finger_table, validate_walkthrough
 
 ROOT = Path(__file__).resolve().parents[1]
-STATIC_VERSION = os.environ.get("SUBNET_TUTOR_STATIC_VERSION", "4")
+STATIC_VERSION = os.environ.get("SUBNET_TUTOR_STATIC_VERSION", "5")
 
 
 def create_app() -> Flask:

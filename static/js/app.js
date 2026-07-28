@@ -11,8 +11,14 @@ document.querySelectorAll('.lang-switch button').forEach((btn) => {
   btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
 });
 
-const RAG_TIMEOUT_MS = 10000;
-const LLM_TIMEOUT_MS = 120000;
+const RAG_TIMEOUT_MS = 15000;
+const LLM_TIMEOUT_MS = 180000;
+const MODEL_POLL_MS = 2000;
+const MODEL_POLL_MAX = 45;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function fetchModelStatus() {
   try {
@@ -20,16 +26,17 @@ async function fetchModelStatus() {
     if (!res.ok) return null;
     return res.json();
   } catch (err) {
-    console.error('[askTutor] model-status failed:', err);
+    console.error('[tutor] model-status failed:', err);
     return null;
   }
 }
 
-async function callExplainApi(question, useLlm, signal) {
-  const res = await fetch('/api/explain', {
+async function callTutorApi(url, body, useLlm, signal) {
+  const payload = { ...body, use_llm: useLlm };
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, use_llm: useLlm }),
+    body: JSON.stringify(payload),
     signal,
   });
 
@@ -37,90 +44,98 @@ async function callExplainApi(question, useLlm, signal) {
   try {
     data = await res.json();
   } catch (parseErr) {
-    console.error('[askTutor] invalid JSON response:', parseErr, 'status:', res.status);
+    console.error('[tutor] invalid JSON:', parseErr, 'status:', res.status);
     throw new Error('invalid_json');
   }
 
   if (!res.ok) {
-    console.error('[askTutor] HTTP error:', res.status, data);
     throw new Error(data.error || data.answer || 'request_failed');
   }
-
   return data;
 }
 
-async function askTutor(question, outputEl, options = {}) {
-  const I18N = window.I18N || {};
-
-  if (!question?.trim()) {
-    const msg = I18N.no_response || 'No question provided';
-    if (outputEl) outputEl.textContent = msg;
-    console.error('[askTutor] empty question');
-    return { error: 'empty_question' };
-  }
-
-  let useLlm = options.useLlm;
-
-  if (useLlm === undefined) {
-    const status = await fetchModelStatus();
-    useLlm = Boolean(status?.loaded);
-    if (outputEl) {
-      if (status?.loading) {
-        outputEl.textContent = I18N.loading_model || I18N.loading_rag || '...';
-      } else if (useLlm) {
-        outputEl.textContent = I18N.loading_llm || I18N.loading || 'Generating explanation...';
-      } else {
-        outputEl.textContent = I18N.loading_rag || I18N.loading || '...';
-      }
-    }
-  } else if (outputEl) {
-    outputEl.textContent = useLlm
-      ? I18N.loading_llm || I18N.loading || 'Generating explanation...'
-      : I18N.loading_rag || I18N.loading || '...';
-  }
-
-  const timeoutMs = useLlm ? LLM_TIMEOUT_MS : RAG_TIMEOUT_MS;
+async function requestWithTimeout(url, body, useLlm, timeoutMs) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await callTutorApi(url, body, useLlm, controller.signal);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function waitForModelLoaded() {
+  for (let i = 0; i < MODEL_POLL_MAX; i++) {
+    const status = await fetchModelStatus();
+    if (status?.loaded) return status;
+    if (status?.status === 'error') return status;
+    await sleep(MODEL_POLL_MS);
+  }
+  return fetchModelStatus();
+}
+
+async function tutorRequest(url, body, outputEl, options = {}) {
+  const I18N = window.I18N || {};
+  let useLlm = options.useLlm;
+
+  const status = await fetchModelStatus();
+  if (useLlm === undefined) {
+    useLlm = Boolean(status?.loaded);
+  }
+
+  if (outputEl) {
+    if (status?.loading && !status?.loaded) {
+      outputEl.textContent = I18N.loading_model || I18N.loading_rag || '...';
+    } else if (useLlm) {
+      outputEl.textContent = I18N.loading_llm || 'Generating explanation...';
+    } else {
+      outputEl.textContent = I18N.loading_rag || 'Searching local knowledge...';
+    }
+  }
+
+  const tryRequest = async (llm) => {
+    const timeoutMs = llm ? LLM_TIMEOUT_MS : RAG_TIMEOUT_MS;
+    return requestWithTimeout(url, body, llm, timeoutMs);
+  };
 
   try {
-    const data = await callExplainApi(question, useLlm, controller.signal);
-    clearTimeout(timeoutId);
+    let data = await tryRequest(useLlm);
+
+    // Model still loading — wait and retry once with LLM when ready
+    if (
+      !useLlm &&
+      data.mode === 'fallback' &&
+      (data.model_status === 'loading' || data.model_status === 'pending')
+    ) {
+      if (outputEl) {
+        outputEl.textContent = I18N.loading_model || 'Waiting for model...';
+      }
+      const ready = await waitForModelLoaded();
+      updateFooterStatus(ready);
+      if (ready?.loaded) {
+        if (outputEl) {
+          outputEl.textContent = I18N.loading_llm || 'Generating explanation...';
+        }
+        data = await tryRequest(true);
+      }
+    }
 
     const answer = data.answer || data.error || I18N.no_response;
-    if (outputEl) {
-      outputEl.textContent = answer;
-    }
+    if (outputEl) outputEl.textContent = answer;
     return data;
   } catch (err) {
-    clearTimeout(timeoutId);
-    console.error('[askTutor] request failed:', err);
+    console.error('[tutor] request failed:', err);
 
-    // If LLM timed out, fall back to fast local knowledge instead of showing an error
     if (useLlm && err.name === 'AbortError') {
-      console.warn('[askTutor] LLM timed out — retrying with local knowledge');
-      if (outputEl) {
-        outputEl.textContent = I18N.loading_rag || 'Searching local knowledge...';
-      }
-      const fallbackController = new AbortController();
-      const fallbackTimeout = setTimeout(() => fallbackController.abort(), RAG_TIMEOUT_MS);
+      if (outputEl) outputEl.textContent = I18N.loading_rag || 'Searching local knowledge...';
       try {
-        const data = await callExplainApi(question, false, fallbackController.signal);
-        clearTimeout(fallbackTimeout);
+        const data = await tryRequest(false);
         const answer =
-          (I18N.llm_slow_fallback || '') +
-          (data.answer || data.error || I18N.no_response);
-        if (outputEl) {
-          outputEl.textContent = answer;
-        }
+          (I18N.llm_slow_fallback || '') + (data.answer || I18N.no_response);
+        if (outputEl) outputEl.textContent = answer;
         return { ...data, mode: 'fallback', llm_timed_out: true };
       } catch (fallbackErr) {
-        clearTimeout(fallbackTimeout);
-        console.error('[askTutor] fallback retry failed:', fallbackErr);
-        if (outputEl) {
-          outputEl.textContent = I18N.request_error || I18N.no_response;
-        }
-        return { error: String(fallbackErr) };
+        console.error('[tutor] fallback failed:', fallbackErr);
       }
     }
 
@@ -134,7 +149,21 @@ async function askTutor(question, outputEl, options = {}) {
   }
 }
 
+async function askTutor(question, outputEl, options = {}) {
+  if (!question?.trim()) {
+    const msg = (window.I18N || {}).no_response || 'No question provided';
+    if (outputEl) outputEl.textContent = msg;
+    return { error: 'empty_question' };
+  }
+  return tutorRequest('/api/explain', { question }, outputEl, options);
+}
+
+async function askHint(scenario, outputEl) {
+  return tutorRequest('/api/game/hint', { scenario }, outputEl);
+}
+
 window.askTutor = askTutor;
+window.askHint = askHint;
 window.fetchModelStatus = fetchModelStatus;
 
 function updateFooterStatus(status) {

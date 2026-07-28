@@ -306,6 +306,8 @@ def ask_tutor(
             return {"answer": answer, "mode": "fallback", "error": str(exc)}
 
     loading = is_model_loading() and not is_model_loaded()
+    if is_model_loaded():
+        loading = False
     answer = generate_fallback_response(
         user_question,
         context,

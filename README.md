@@ -12,20 +12,19 @@ Offline bilingual (English / Arabic) subnetting tutor for the **Africa Deep Tech
 ## Quick Start
 
 ```bash
-# 1. Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+git clone https://github.com/mahmouddahiie-pixel/subnet-tutor.git
+cd subnet-tutor
+bash install.sh    # one-time: venv + deps + model download
+bash run.sh        # start app → http://127.0.0.1:8765
+```
 
-# 2. Download model weights (one-time, requires internet)
-bash download_model.sh
+**Full guide:** [INSTALL.md](INSTALL.md)
 
-# 3. Build RAG index (automatic on first run)
-python -m app.rag.indexer
+Wait until footer shows **LLM ready** (~1–2 min first run), then use Explain / Hint.
 
-# 4. Launch app
-bash run.sh
-# Open http://127.0.0.1:8765
+```bash
+# If LLM fails on a machine:
+bash scripts/diagnose_llm.sh
 ```
 
 ## ADTC Submission
